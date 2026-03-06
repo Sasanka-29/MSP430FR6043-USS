@@ -148,65 +148,26 @@ end
 
 ## 🖥️ Flowchart — GUI Application
 
-```
+```mermaid
 
-                        ┌──────────────────┐
-                        │   Application    │
-                        │     Start        │
-                        └────────┬─────────┘
-                                 │
-                                 ▼
-                        ┌──────────────────┐
-                        │  Initialize UI   │
-                        │  (Tkinter +      │
-                        │   Matplotlib)    │
-                        └────────┬─────────┘
-                                 │
-                                 ▼
-                        ┌──────────────────┐
-                        │  Scan COM Ports  │
-                        │  (pyserial)      │
-                        └────────┬─────────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────────┐
-                    │  User Selects:             │
-                    │  • COM Port                │
-                    │  • Baud Rate (def: 115200) │
-                    │  • Clicks "Connect"        │
-                    └────────────┬───────────────┘
-                                 │
-                                 ▼
-                    ┌────────────────────────────┐
-                    │  Open Serial Connection    │
-                    │  serial.Serial(port, baud) │
-                    └──────────���─┬───────────────┘
-                                 │
-                        ┌────────┴────────┐
-                        │                 │
-                        ▼                 ▼
-              ┌──────────────┐  ┌───────────────────┐
-              │ Read Thread  │  │ Animation Thread   │
-              │ (Background) │  │ (150ms interval)   │
-              │              │  │                     │
-              │ • readline() │  │ • Update 4 graphs   │
-              │ • parse_line │  │ • Rescale axes       │
-              │ • buffer data│  │ • Refresh canvas     │
-              │ • update stat│  │                     │
-              │ • write CSV  │  │                     │
-              └──────┬───────┘  └───────────────────┘
-                     │
-                     ▼
-           ┌───────────────────┐
-           │  Data Buffers     │
-           │  (deque, max=200) │
-           │                   │
-           │  AbsTof-UPS [ ]   │
-           │  AbsTof-DNS [ ]   │
-           │  DToF       [ ]   │
-           │  VFR        [ ]   │
-           └───────────────────┘
+flowchart TD
+    A["Application Start"] --> B
 
+    B["Initialize UI Tkinter + Matplotlib"] --> C
+
+    C["Scan COM Ports pyserial"] --> D
+
+    D["User Selects: • COM Port • Baud Rate • 'Connect'"] --> E
+
+    E["Open Serial Connection serial.Serial(port, baud)"] --> RT & AT
+
+    RT["Read Thread (Background) • readline() • parse_line • buffer data • update stat • write CSV"]
+
+    AT["Animation Thread (150ms interval) • Update 4 graphs • Rescale axes • Refresh canvas"]
+
+    RT --> BUF
+
+    BUF["Data Buffers deque,AbsTof-UPS[ ] AbsTof-DNS[ ] DToF[ ] VFR[ ]"]
 ```
 
 ---
