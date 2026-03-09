@@ -27,13 +27,10 @@ from matplotlib.gridspec import GridSpec
 from scipy.signal import butter, lfilter_zi, lfilter
 
 # ── Constants ─────────────────────────────────────────────────────────────────
-DELIM_DICT   = {"$": "AbsTof-UPS", "#": "AbsTof-DNS", "%": "DToF", "!": "VFR"}
-CHANNELS     = ["AbsTof-UPS", "AbsTof-DNS", "DToF", "VFR"]
+DELIM_DICT   = {"!": "VFR"}
+CHANNELS     = ["VFR"]
 PLOT_COLORS  = {
-    "AbsTof-UPS": "#e05252",   # red  (like UPS in reference)
-    "AbsTof-DNS": "#4a90d9",   # blue (like DNS in reference)
-    "DToF":       "#e05252",   # red for DToF main plot
-    "VFR":        "#4a90d9",   # blue for VFR main plot
+    "VFR": "#4a90d9",
 }
 MAX_POINTS   = 500
 LPF_CUTOFF   = 15.0
@@ -217,69 +214,13 @@ class SerialMonitorApp:
         plots_outer = tk.Frame(self.root, bg=BG_MAIN)
         plots_outer.grid(row=1, column=0, sticky="nsew", padx=6, pady=2)
         plots_outer.columnconfigure(0, weight=1)
-        plots_outer.rowconfigure(0, weight=2)   # DToF row — taller
-        plots_outer.rowconfigure(2, weight=3)   # AbsTof + VFR row
+        plots_outer.rowconfigure(0, weight=1)
 
-        # ── Top plot: DToF (full width) ───────────────────────────────────────
-        dtof_frame = tk.LabelFrame(plots_outer, text="Delta ToF",
-                                   bg=BG_MAIN, fg=FG_LABEL,
-                                   font=FONT_TITLE, relief="groove", bd=2)
-        dtof_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=(2, 0))
-        dtof_frame.columnconfigure(0, weight=1)
-        dtof_frame.rowconfigure(0, weight=1)
-
-        self.fig_dtof = Figure(facecolor=BG_MAIN)
-        self.ax_dtof  = self.fig_dtof.add_subplot(111)
-        self._style_ax(self.ax_dtof, ylabel="ns")
-        self.line_dtof, = self.ax_dtof.plot([], [], color=PLOT_COLORS["DToF"],
-                                             linewidth=0.9, antialiased=True)
-        self.fig_dtof.subplots_adjust(left=0.07, right=0.98, top=0.92, bottom=0.18)
-        cv = FigureCanvasTkAgg(self.fig_dtof, master=dtof_frame)
-        cv.get_tk_widget().grid(row=0, column=0, sticky="nsew")
-        self.canvas_dtof = cv
-
-        # DToF stats bar
-        self.dtof_stat_var = tk.StringVar(value="Mean= --  Min= --  Max= --  σ= --")
-        tk.Label(plots_outer, textvariable=self.dtof_stat_var,
-                 bg=BG_MAIN, fg=FG_LABEL, font=FONT_STAT,
-                 anchor="center").grid(row=1, column=0, sticky="ew", pady=(0, 2))
-
-        # ── Bottom row: AbsTof (left) + VFR (right) ───────────────────────────
-        bottom = tk.Frame(plots_outer, bg=BG_MAIN)
-        bottom.grid(row=2, column=0, sticky="nsew", padx=2, pady=(0, 2))
-        bottom.columnconfigure(0, weight=1)
-        bottom.columnconfigure(1, weight=1)
-        bottom.rowconfigure(0, weight=1)
-
-        # AbsTof (overlaid UPS + DNS)
-        abs_frame = tk.LabelFrame(bottom, text="Absolute TOF",
+        # ── Full-width VFR plot ───────────────────────────────────────────────
+        vfr_frame = tk.LabelFrame(plots_outer, text="Volume Flow Rate",
                                   bg=BG_MAIN, fg=FG_LABEL,
                                   font=FONT_TITLE, relief="groove", bd=2)
-        abs_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 3))
-        abs_frame.columnconfigure(0, weight=1)
-        abs_frame.rowconfigure(0, weight=1)
-
-        self.fig_abs = Figure(facecolor=BG_MAIN)
-        self.ax_abs  = self.fig_abs.add_subplot(111)
-        self._style_ax(self.ax_abs, ylabel="µs")
-        self.line_ups, = self.ax_abs.plot([], [], color=PLOT_COLORS["AbsTof-UPS"],
-                                           linewidth=0.9, label="UPS", antialiased=True)
-        self.line_dns, = self.ax_abs.plot([], [], color=PLOT_COLORS["AbsTof-DNS"],
-                                           linewidth=0.9, label="DNS", antialiased=True)
-        self.ax_abs.legend(loc="upper right", fontsize=7,
-                           facecolor=BG_PLOT, edgecolor=BORDER_CLR,
-                           labelcolor=[PLOT_COLORS["AbsTof-UPS"],
-                                       PLOT_COLORS["AbsTof-DNS"]])
-        self.fig_abs.subplots_adjust(left=0.10, right=0.98, top=0.92, bottom=0.18)
-        cv2 = FigureCanvasTkAgg(self.fig_abs, master=abs_frame)
-        cv2.get_tk_widget().grid(row=0, column=0, sticky="nsew")
-        self.canvas_abs = cv2
-
-        # VFR (right)
-        vfr_frame = tk.LabelFrame(bottom, text="Volume Flow Rate",
-                                  bg=BG_MAIN, fg=FG_LABEL,
-                                  font=FONT_TITLE, relief="groove", bd=2)
-        vfr_frame.grid(row=0, column=1, sticky="nsew", padx=(3, 0))
+        vfr_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=2)
         vfr_frame.columnconfigure(0, weight=1)
         vfr_frame.rowconfigure(0, weight=1)
 
@@ -288,7 +229,7 @@ class SerialMonitorApp:
         self._style_ax(self.ax_vfr, ylabel="L/h")
         self.line_vfr, = self.ax_vfr.plot([], [], color=PLOT_COLORS["VFR"],
                                            linewidth=0.9, antialiased=True)
-        self.fig_vfr.subplots_adjust(left=0.12, right=0.98, top=0.92, bottom=0.18)
+        self.fig_vfr.subplots_adjust(left=0.08, right=0.98, top=0.95, bottom=0.12)
         cv3 = FigureCanvasTkAgg(self.fig_vfr, master=vfr_frame)
         cv3.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.canvas_vfr = cv3
@@ -297,17 +238,11 @@ class SerialMonitorApp:
         stats_strip = tk.Frame(self.root, bg=BG_CTRL, relief="groove", bd=1)
         stats_strip.grid(row=2, column=0, sticky="ew", padx=6, pady=(0, 4))
         stats_strip.columnconfigure(0, weight=1)
-        stats_strip.columnconfigure(1, weight=1)
 
-        self.abs_stat_var = tk.StringVar(value="UPS (Red): --    DNS (Blue): --")
         self.vfr_stat_var = tk.StringVar(value="Mean= --  Min= --  Max= --  σ= --")
-
-        tk.Label(stats_strip, textvariable=self.abs_stat_var,
-                 bg=BG_CTRL, fg=FG_LABEL, font=FONT_STAT,
-                 anchor="w", justify="left").grid(row=0, column=0, sticky="w", padx=8, pady=2)
         tk.Label(stats_strip, textvariable=self.vfr_stat_var,
                  bg=BG_CTRL, fg=FG_LABEL, font=FONT_STAT,
-                 anchor="e", justify="right").grid(row=0, column=1, sticky="e", padx=8, pady=2)
+                 anchor="center").grid(row=0, column=0, sticky="ew", padx=8, pady=2)
 
         # ── Raw log (collapsible bottom strip) ───────────────────────────────
         log_frame = tk.Frame(self.root, bg=BG_MAIN)
@@ -485,51 +420,14 @@ class SerialMonitorApp:
         self.root.after(self.PLOT_MS, self._schedule_plot)
 
     def _redraw(self):
-        dirty_canvases = set()
-
-        # DToF
-        xs = list(self.times["DToF"])
-        ys = list(self.data["DToF"])
-        if len(xs) >= 2:
-            self.line_dtof.set_data(xs, ys)
-            self._autoscale(self.ax_dtof, xs, ys)
-            self._fmt_time_axis(self.ax_dtof, xs)
-            dirty_canvases.add(self.canvas_dtof)
-            self.dtof_stat_var.set(_stats_str(self.data["DToF"]))
-
-        # AbsTof UPS + DNS overlaid
-        xs_ups = list(self.times["AbsTof-UPS"])
-        ys_ups = list(self.data["AbsTof-UPS"])
-        xs_dns = list(self.times["AbsTof-DNS"])
-        ys_dns = list(self.data["AbsTof-DNS"])
-        if len(xs_ups) >= 2:
-            self.line_ups.set_data(xs_ups, ys_ups)
-            dirty_canvases.add(self.canvas_abs)
-        if len(xs_dns) >= 2:
-            self.line_dns.set_data(xs_dns, ys_dns)
-            dirty_canvases.add(self.canvas_abs)
-        if len(xs_ups) >= 2 or len(xs_dns) >= 2:
-            all_ys = ys_ups + ys_dns
-            all_xs = xs_ups  # use UPS timing for x-axis
-            if all_ys:
-                self._autoscale(self.ax_abs, all_xs, all_ys)
-                self._fmt_time_axis(self.ax_abs, all_xs)
-            ups_s = f"UPS (Red): {_stats_str(self.data['AbsTof-UPS'])}"
-            dns_s = f"DNS (Blue): {_stats_str(self.data['AbsTof-DNS'])}"
-            self.abs_stat_var.set(f"{ups_s}\n{dns_s}")
-
-        # VFR
         xs_v = list(self.times["VFR"])
         ys_v = list(self.data["VFR"])
         if len(xs_v) >= 2:
             self.line_vfr.set_data(xs_v, ys_v)
             self._autoscale(self.ax_vfr, xs_v, ys_v)
             self._fmt_time_axis(self.ax_vfr, xs_v)
-            dirty_canvases.add(self.canvas_vfr)
             self.vfr_stat_var.set(_stats_str(self.data["VFR"]))
-
-        for cv in dirty_canvases:
-            cv.draw_idle()
+            self.canvas_vfr.draw_idle()
 
     def _autoscale(self, ax, xs, ys):
         if not xs or not ys:
@@ -593,14 +491,11 @@ class SerialMonitorApp:
             self.times[ch].clear()
         self._rebuild_filters()
         self.t0 = time.time()
-        self.dtof_stat_var.set("Mean= --  Min= --  Max= --  σ= --")
-        self.abs_stat_var.set("UPS (Red): --    DNS (Blue): --")
         self.vfr_stat_var.set("Mean= --  Min= --  Max= --  σ= --")
         self.log_text.configure(state="normal")
         self.log_text.delete("1.0", tk.END)
         self.log_text.configure(state="disabled")
-        for cv in (self.canvas_dtof, self.canvas_abs, self.canvas_vfr):
-            cv.draw_idle()
+        self.canvas_vfr.draw_idle()
 
     def _log(self, msg):
         self.log_text.configure(state="normal")
