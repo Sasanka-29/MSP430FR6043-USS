@@ -1,7 +1,8 @@
 #!/usr/bin/python
 """
-Serial Monitor GUI - Reads UART data, parses it via uart_parse logic,
-and displays live graphs for AbsTof-UPS, AbsTof-DNS, DToF, and VFR.
+Serial Monitor GUI - Industrial-style layout inspired by professional flow meter software.
+Layout: Control Panel top bar → large DToF plot (top) → AbsTof overlay + VFR side by side (bottom)
+Stats panels below each plot. Filter controls integrated in control panel.
 """
 
 import re
@@ -14,6 +15,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from collections import deque
 from datetime import datetime
+import numpy as np
 
 import serial
 import serial.tools.list_ports
@@ -21,42 +23,59 @@ import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+from matplotlib.gridspec import GridSpec
 from scipy.signal import butter, lfilter_zi, lfilter
 
-# ── Parse logic ───────────────────────────────────────────────────────────────
-DELIM_DICT = {"$": "AbsTof-UPS", "#": "AbsTof-DNS", "%": "DToF", "!": "VFR"}
-CHANNELS   = ["AbsTof-UPS", "AbsTof-DNS", "DToF", "VFR"]
-COLORS     = {"AbsTof-UPS": "#00e5ff", "AbsTof-DNS": "#ff4081",
-              "DToF":       "#69ff47", "VFR":        "#ffd740"}
-MAX_POINTS   = 300
-LPF_CUTOFF   = 3.0   # Hz - low-pass filter cutoff
-LPF_ORDER    = 2     # 2nd-order Butterworth (low lag)
-SAMPLE_RATE  = 500.0 # Hz - fixed sample rate
+# ── Constants ─────────────────────────────────────────────────────────────────
+DELIM_DICT   = {"$": "AbsTof-UPS", "#": "AbsTof-DNS", "%": "DToF", "!": "VFR"}
+CHANNELS     = ["AbsTof-UPS", "AbsTof-DNS", "DToF", "VFR"]
+PLOT_COLORS  = {
+    "AbsTof-UPS": "#e05252",   # red  (like UPS in reference)
+    "AbsTof-DNS": "#4a90d9",   # blue (like DNS in reference)
+    "DToF":       "#e05252",   # red for DToF main plot
+    "VFR":        "#4a90d9",   # blue for VFR main plot
+}
+MAX_POINTS   = 500
+LPF_CUTOFF   = 15.0
+LPF_ORDER    = 2
+SAMPLE_RATE  = 500.0
+
+# UI Colors — light industrial theme matching reference
+BG_MAIN      = "#d4d0c8"   # Windows classic gray
+BG_PANEL     = "#ece9d8"   # slightly lighter panel
+BG_PLOT      = "#ffffff"   # white plot backgrounds
+BG_CTRL      = "#d4d0c8"
+FG_TEXT      = "#000000"
+FG_LABEL     = "#1a1a1a"
+ACCENT_GREEN = "#008000"
+ACCENT_RED   = "#cc0000"
+ACCENT_BLUE  = "#003399"
+BORDER_CLR   = "#808080"
+
+FONT_TITLE  = ("Arial", 11, "bold")
+FONT_LABEL  = ("Arial", 9)
+FONT_STAT   = ("Arial", 8)
+FONT_BTN    = ("Arial", 9, "bold")
+FONT_MONO   = ("Courier New", 8)
+
 
 def _make_butter(cutoff_hz, fs, order=2):
-    """Return (b, a) Butterworth low-pass coefficients."""
     nyq = fs / 2.0
-    cutoff_hz = min(cutoff_hz, nyq * 0.95)  # never exceed Nyquist
+    cutoff_hz = min(cutoff_hz, nyq * 0.95)
+    cutoff_hz = max(cutoff_hz, 0.01)
     b, a = butter(order, cutoff_hz / nyq, btype="low", analog=False)
     return b, a
 
 
 def parse_line(raw_line: str):
-    """
-    Parse one raw serial line.
-    Handles both \\n and \\r\\n endings.
-    Returns (channel_name, float_value) or None on failure.
-    """
-    line = raw_line.strip()           # strips \r, \n, spaces
-    line = re.sub(r"\s+", "", line)   # remove any embedded whitespace
+    line = raw_line.strip()
+    line = re.sub(r"\s+", "", line)
     parts = line.split(",")
     if len(parts) < 2:
         return None
-    key   = parts[0]
-    hex_s = parts[1]
+    key, hex_s = parts[0], parts[1]
     if key not in DELIM_DICT:
         return None
-    # Validate hex string before conversion
     if not re.fullmatch(r"[0-9A-Fa-f]{1,8}", hex_s):
         return None
     try:
@@ -67,175 +86,301 @@ def parse_line(raw_line: str):
         return None
 
 
-# ── Main Application ──────────────────────────────────────────────────────────
+def _stats_str(vals):
+    """Return Mean/Min/Max/σ string for a deque."""
+    if len(vals) < 2:
+        return "Mean= --  Min= --  Max= --  σ= --"
+    a = list(vals)
+    return (f"Mean= {np.mean(a):.2f}  Min= {np.min(a):.2f}  "
+            f"Max= {np.max(a):.2f}  σ= {np.std(a):.2f}")
+
+
+# ── App ───────────────────────────────────────────────────────────────────────
 class SerialMonitorApp:
-    POLL_MS = 50    # drain queue every 50 ms (20x/sec)
-    PLOT_MS = 100   # redraw plot every 100 ms (10 fps)
+    POLL_MS = 50
+    PLOT_MS = 120
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Serial UART Monitor")
-        self.root.configure(bg="#0d1117")
-        self.root.geometry("1200x780")
-        self.root.minsize(900, 600)
+        self.root.title("Flow Meter Serial Monitor")
+        self.root.configure(bg=BG_MAIN)
+        self.root.geometry("1100x820")
+        self.root.minsize(900, 700)
 
-        # Thread-safe queue: serial thread -> UI thread
-        self.rx_queue = queue.Queue()
-
-        # Data buffers (only written from UI thread after draining queue)
-        self.data  = {ch: deque(maxlen=MAX_POINTS) for ch in CHANNELS}
-        self.times = {ch: deque(maxlen=MAX_POINTS) for ch in CHANNELS}
-        self.t0    = time.time()
-
-        # Only redraw plot when new data arrived
+        self.rx_queue   = queue.Queue()
+        self.data       = {ch: deque(maxlen=MAX_POINTS) for ch in CHANNELS}
+        self.times      = {ch: deque(maxlen=MAX_POINTS) for ch in CHANNELS}
+        self.t0         = time.time()
         self.plot_dirty = False
+        self.locked     = False
 
-        # Per-channel IIR filter state — fixed at 500 Hz sample rate
+        # Filter state
+        self.filter_enabled = tk.BooleanVar(value=True)
+        self.cutoff_var     = tk.DoubleVar(value=LPF_CUTOFF)
         b0, a0 = _make_butter(LPF_CUTOFF, SAMPLE_RATE, LPF_ORDER)
         zi0 = lfilter_zi(b0, a0)
         self.filter_b  = {ch: b0.copy() for ch in CHANNELS}
         self.filter_a  = {ch: a0.copy() for ch in CHANNELS}
         self.filter_zi = {ch: zi0.copy() for ch in CHANNELS}
 
-        # Serial state
-        self.ser         = None
-        self.running     = False
-        self.read_thread = None
-
-        # CSV state
-        self.csv_file   = None
-        self.csv_writer = None
-        self.csv_path   = None
+        # Serial / CSV state
+        self.ser = self.running = self.read_thread = None
+        self.csv_file = self.csv_writer = self.csv_path = None
 
         self._build_ui()
         self._refresh_ports()
         self._poll_queue()
         self._schedule_plot()
 
-    # ── UI ────────────────────────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────────────────
     def _build_ui(self):
-        style = ttk.Style()
-        style.theme_use("clam")
-        style.configure("TFrame",          background="#0d1117")
-        style.configure("TLabel",          background="#0d1117", foreground="#c9d1d9",
-                        font=("Consolas", 10))
-        style.configure("Header.TLabel",   background="#0d1117", foreground="#58a6ff",
-                        font=("Consolas", 11, "bold"))
-        style.configure("TCombobox",       fieldbackground="#161b22", background="#161b22",
-                        foreground="#c9d1d9", selectbackground="#1f6feb")
-        style.configure("TButton",         background="#21262d", foreground="#c9d1d9",
-                        font=("Consolas", 10), relief="flat", padding=6)
-        style.map("TButton",
-                  background=[("active", "#30363d"), ("pressed", "#1f6feb")])
-        style.configure("Connect.TButton", foreground="#3fb950",
-                        font=("Consolas", 10, "bold"))
-        style.configure("Danger.TButton",  foreground="#f85149",
-                        font=("Consolas", 10, "bold"))
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(1, weight=1)
 
-        # Toolbar
-        toolbar = ttk.Frame(self.root, style="TFrame")
-        toolbar.pack(side=tk.TOP, fill=tk.X, padx=12, pady=(10, 4))
+        # ── Control Panel (top bar) ───────────────────────────────────────────
+        cp = tk.LabelFrame(self.root, text="Control Panel",
+                           bg=BG_CTRL, fg=FG_LABEL,
+                           font=FONT_LABEL, relief="groove", bd=2)
+        cp.grid(row=0, column=0, sticky="ew", padx=6, pady=(6, 2))
 
-        ttk.Label(toolbar, text="SERIAL UART MONITOR",
-                  style="Header.TLabel").pack(side=tk.LEFT, padx=(0, 20))
+        # Row 0 – action buttons + connection
+        row0 = tk.Frame(cp, bg=BG_CTRL)
+        row0.pack(fill=tk.X, padx=6, pady=(4, 2))
 
-        ttk.Label(toolbar, text="PORT").pack(side=tk.LEFT, padx=(8, 2))
+        self._btn(row0, "▶  Start",  self._connect_wrap,   bg="#e8f5e9", fg=ACCENT_GREEN).pack(side=tk.LEFT, padx=3)
+        self._btn(row0, "■  Stop",   self._disconnect_wrap, bg="#ffebee", fg=ACCENT_RED).pack(side=tk.LEFT, padx=3)
+        self._btn(row0, "🔒 Lock All",   self._toggle_lock,    bg=BG_PANEL).pack(side=tk.LEFT, padx=3)
+        self._btn(row0, "💾 Save Waveforms", self._toggle_save, bg=BG_PANEL).pack(side=tk.LEFT, padx=3)
+        self._btn(row0, "↺  Reset Graphs",   self._clear_data,  bg=BG_PANEL).pack(side=tk.LEFT, padx=3)
+
+        # status indicator
+        self.status_var = tk.StringVar(value="● Disconnected")
+        tk.Label(row0, textvariable=self.status_var, bg=BG_CTRL,
+                 fg=ACCENT_RED, font=FONT_BTN).pack(side=tk.RIGHT, padx=8)
+
+        # Row 1 – port/baud + filter
+        row1 = tk.Frame(cp, bg=BG_CTRL)
+        row1.pack(fill=tk.X, padx=6, pady=(2, 4))
+
+        tk.Label(row1, text="PORT:", bg=BG_CTRL, fg=FG_LABEL, font=FONT_LABEL).pack(side=tk.LEFT)
         self.port_var = tk.StringVar()
-        self.port_cb  = ttk.Combobox(toolbar, textvariable=self.port_var,
-                                     width=10, state="readonly")
-        self.port_cb.pack(side=tk.LEFT, padx=(0, 8))
+        self.port_cb = ttk.Combobox(row1, textvariable=self.port_var,
+                                    width=10, state="readonly", font=FONT_LABEL)
+        self.port_cb.pack(side=tk.LEFT, padx=(2, 8))
 
-        ttk.Label(toolbar, text="BAUD").pack(side=tk.LEFT, padx=(0, 2))
+        tk.Label(row1, text="BAUD:", bg=BG_CTRL, fg=FG_LABEL, font=FONT_LABEL).pack(side=tk.LEFT)
         self.baud_var = tk.StringVar(value="115200")
-        ttk.Combobox(toolbar, textvariable=self.baud_var,
+        ttk.Combobox(row1, textvariable=self.baud_var, width=9, state="readonly",
+                     font=FONT_LABEL,
                      values=["9600","19200","38400","57600",
-                             "115200","230400","460800","921600"],
-                     width=9, state="readonly").pack(side=tk.LEFT, padx=(0, 12))
+                             "115200","230400","460800","921600"]).pack(side=tk.LEFT, padx=(2, 8))
+        self._btn(row1, "Refresh", self._refresh_ports, bg=BG_PANEL).pack(side=tk.LEFT, padx=(0, 16))
 
-        ttk.Button(toolbar, text="Refresh",
-                   command=self._refresh_ports).pack(side=tk.LEFT, padx=(0, 4))
+        # Separator line
+        tk.Frame(row1, bg=BORDER_CLR, width=2, height=22).pack(side=tk.LEFT, padx=8)
 
-        self.connect_btn = ttk.Button(toolbar, text="Connect",
-                                      style="Connect.TButton",
-                                      command=self._toggle_connect)
-        self.connect_btn.pack(side=tk.LEFT, padx=(0, 12))
+        # Filter controls
+        tk.Label(row1, text="LPF:", bg=BG_CTRL, fg=FG_LABEL, font=FONT_LABEL).pack(side=tk.LEFT, padx=(0, 4))
+        self.filter_chk = tk.Checkbutton(
+            row1, text="Enabled", variable=self.filter_enabled,
+            bg=BG_CTRL, fg=ACCENT_GREEN, font=FONT_LABEL,
+            selectcolor=BG_CTRL, activebackground=BG_CTRL,
+            command=self._on_filter_toggle)
+        self.filter_chk.pack(side=tk.LEFT, padx=(0, 8))
 
-        self.save_btn = ttk.Button(toolbar, text="Save CSV",
-                                   command=self._toggle_save)
-        self.save_btn.pack(side=tk.LEFT, padx=(0, 4))
+        tk.Label(row1, text="Cutoff:", bg=BG_CTRL, fg=FG_LABEL, font=FONT_LABEL).pack(side=tk.LEFT)
+        self.cutoff_slider = tk.Scale(
+            row1, from_=1, to=200, orient=tk.HORIZONTAL,
+            resolution=0.5, variable=self.cutoff_var,
+            bg=BG_CTRL, fg=FG_LABEL, troughcolor="#b0b0b0",
+            highlightthickness=0, bd=1, length=160,
+            font=("Arial", 7), command=self._on_cutoff_change,
+            showvalue=False)
+        self.cutoff_slider.pack(side=tk.LEFT, padx=(2, 2))
 
-        ttk.Button(toolbar, text="Clear", style="Danger.TButton",
-                   command=self._clear_data).pack(side=tk.LEFT, padx=(0, 4))
+        vcmd = (self.root.register(self._validate_cutoff), "%P")
+        self.cutoff_entry = tk.Entry(
+            row1, textvariable=self.cutoff_var, width=6,
+            bg="white", fg=ACCENT_BLUE, font=FONT_MONO,
+            relief="sunken", bd=2, validate="key", validatecommand=vcmd)
+        self.cutoff_entry.pack(side=tk.LEFT, padx=(0, 2))
+        self.cutoff_entry.bind("<Return>",   self._on_cutoff_commit)
+        self.cutoff_entry.bind("<FocusOut>", self._on_cutoff_commit)
+        tk.Label(row1, text="Hz", bg=BG_CTRL, fg=FG_LABEL, font=FONT_LABEL).pack(side=tk.LEFT)
 
-        self.status_var = tk.StringVar(value="Disconnected")
-        self.status_lbl = ttk.Label(toolbar, textvariable=self.status_var,
-                                    foreground="#f85149",
-                                    font=("Consolas", 10, "bold"))
-        self.status_lbl.pack(side=tk.RIGHT, padx=8)
+        self.filter_status_lbl = tk.Label(
+            row1, text=f"[{LPF_CUTOFF:.1f} Hz]",
+            bg=BG_CTRL, fg=ACCENT_BLUE, font=("Arial", 8, "bold"))
+        self.filter_status_lbl.pack(side=tk.LEFT, padx=(6, 0))
 
-        # Stats bar
-        stats_frame = ttk.Frame(self.root, style="TFrame")
-        stats_frame.pack(side=tk.TOP, fill=tk.X, padx=12, pady=(0, 4))
+        # ── Plots area ────────────────────────────────────────────────────────
+        plots_outer = tk.Frame(self.root, bg=BG_MAIN)
+        plots_outer.grid(row=1, column=0, sticky="nsew", padx=6, pady=2)
+        plots_outer.columnconfigure(0, weight=1)
+        plots_outer.rowconfigure(0, weight=2)   # DToF row — taller
+        plots_outer.rowconfigure(2, weight=3)   # AbsTof + VFR row
 
-        self.stat_vars = {}
-        for ch in CHANNELS:
-            f = tk.Frame(stats_frame, bg="#161b22", bd=0, padx=10, pady=4)
-            f.pack(side=tk.LEFT, padx=4)
-            tk.Label(f, text=ch, bg="#161b22", fg=COLORS[ch],
-                     font=("Consolas", 9, "bold")).pack(side=tk.LEFT, padx=(0, 8))
-            sv = tk.StringVar(value="--")
-            self.stat_vars[ch] = sv
-            tk.Label(f, textvariable=sv, bg="#161b22", fg="#e6edf3",
-                     font=("Consolas", 9)).pack(side=tk.LEFT)
+        # ── Top plot: DToF (full width) ───────────────────────────────────────
+        dtof_frame = tk.LabelFrame(plots_outer, text="Delta ToF",
+                                   bg=BG_MAIN, fg=FG_LABEL,
+                                   font=FONT_TITLE, relief="groove", bd=2)
+        dtof_frame.grid(row=0, column=0, sticky="nsew", padx=2, pady=(2, 0))
+        dtof_frame.columnconfigure(0, weight=1)
+        dtof_frame.rowconfigure(0, weight=1)
 
-        # Plot area
-        plot_frame = tk.Frame(self.root, bg="#0d1117")
-        plot_frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 4))
+        self.fig_dtof = Figure(facecolor=BG_MAIN)
+        self.ax_dtof  = self.fig_dtof.add_subplot(111)
+        self._style_ax(self.ax_dtof, ylabel="ns")
+        self.line_dtof, = self.ax_dtof.plot([], [], color=PLOT_COLORS["DToF"],
+                                             linewidth=0.9, antialiased=True)
+        self.fig_dtof.subplots_adjust(left=0.07, right=0.98, top=0.92, bottom=0.18)
+        cv = FigureCanvasTkAgg(self.fig_dtof, master=dtof_frame)
+        cv.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.canvas_dtof = cv
 
-        self.fig = Figure(figsize=(12, 5.5), facecolor="#0d1117")
-        self.fig.subplots_adjust(hspace=0.45, wspace=0.32,
-                                 left=0.07, right=0.97, top=0.93, bottom=0.1)
+        # DToF stats bar
+        self.dtof_stat_var = tk.StringVar(value="Mean= --  Min= --  Max= --  σ= --")
+        tk.Label(plots_outer, textvariable=self.dtof_stat_var,
+                 bg=BG_MAIN, fg=FG_LABEL, font=FONT_STAT,
+                 anchor="center").grid(row=1, column=0, sticky="ew", pady=(0, 2))
 
-        self.axes  = {}
-        self.lines = {}
-        for i, ch in enumerate(CHANNELS):
-            ax = self.fig.add_subplot(2, 2, i + 1)
-            ax.set_facecolor("#161b22")
-            ax.set_title(ch, color=COLORS[ch], fontsize=10,
-                         fontfamily="Consolas", pad=4)
-            ax.tick_params(colors="#8b949e", labelsize=8)
-            for spine in ax.spines.values():
-                spine.set_edgecolor("#30363d")
-            ax.xaxis.label.set_color("#8b949e")
-            ax.yaxis.label.set_color("#8b949e")
-            ax.set_xlabel("Time (s)", fontsize=8, fontfamily="Consolas")
-            line, = ax.plot([], [], color=COLORS[ch], linewidth=1.4,
-                            solid_capstyle="round")
-            self.axes[ch]  = ax
-            self.lines[ch] = line
+        # ── Bottom row: AbsTof (left) + VFR (right) ───────────────────────────
+        bottom = tk.Frame(plots_outer, bg=BG_MAIN)
+        bottom.grid(row=2, column=0, sticky="nsew", padx=2, pady=(0, 2))
+        bottom.columnconfigure(0, weight=1)
+        bottom.columnconfigure(1, weight=1)
+        bottom.rowconfigure(0, weight=1)
 
-        self.canvas = FigureCanvasTkAgg(self.fig, master=plot_frame)
-        self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        # AbsTof (overlaid UPS + DNS)
+        abs_frame = tk.LabelFrame(bottom, text="Absolute TOF",
+                                  bg=BG_MAIN, fg=FG_LABEL,
+                                  font=FONT_TITLE, relief="groove", bd=2)
+        abs_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 3))
+        abs_frame.columnconfigure(0, weight=1)
+        abs_frame.rowconfigure(0, weight=1)
 
-        # Raw log
-        log_frame = tk.Frame(self.root, bg="#0d1117")
-        log_frame.pack(fill=tk.X, padx=12, pady=(0, 8))
+        self.fig_abs = Figure(facecolor=BG_MAIN)
+        self.ax_abs  = self.fig_abs.add_subplot(111)
+        self._style_ax(self.ax_abs, ylabel="µs")
+        self.line_ups, = self.ax_abs.plot([], [], color=PLOT_COLORS["AbsTof-UPS"],
+                                           linewidth=0.9, label="UPS", antialiased=True)
+        self.line_dns, = self.ax_abs.plot([], [], color=PLOT_COLORS["AbsTof-DNS"],
+                                           linewidth=0.9, label="DNS", antialiased=True)
+        self.ax_abs.legend(loc="upper right", fontsize=7,
+                           facecolor=BG_PLOT, edgecolor=BORDER_CLR,
+                           labelcolor=[PLOT_COLORS["AbsTof-UPS"],
+                                       PLOT_COLORS["AbsTof-DNS"]])
+        self.fig_abs.subplots_adjust(left=0.10, right=0.98, top=0.92, bottom=0.18)
+        cv2 = FigureCanvasTkAgg(self.fig_abs, master=abs_frame)
+        cv2.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.canvas_abs = cv2
 
-        tk.Label(log_frame, text="RAW LOG", bg="#0d1117", fg="#8b949e",
-                 font=("Consolas", 8, "bold")).pack(anchor="w")
+        # VFR (right)
+        vfr_frame = tk.LabelFrame(bottom, text="Volume Flow Rate",
+                                  bg=BG_MAIN, fg=FG_LABEL,
+                                  font=FONT_TITLE, relief="groove", bd=2)
+        vfr_frame.grid(row=0, column=1, sticky="nsew", padx=(3, 0))
+        vfr_frame.columnconfigure(0, weight=1)
+        vfr_frame.rowconfigure(0, weight=1)
 
-        log_inner = tk.Frame(log_frame, bg="#0d1117")
-        log_inner.pack(fill=tk.X)
+        self.fig_vfr = Figure(facecolor=BG_MAIN)
+        self.ax_vfr  = self.fig_vfr.add_subplot(111)
+        self._style_ax(self.ax_vfr, ylabel="L/h")
+        self.line_vfr, = self.ax_vfr.plot([], [], color=PLOT_COLORS["VFR"],
+                                           linewidth=0.9, antialiased=True)
+        self.fig_vfr.subplots_adjust(left=0.12, right=0.98, top=0.92, bottom=0.18)
+        cv3 = FigureCanvasTkAgg(self.fig_vfr, master=vfr_frame)
+        cv3.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.canvas_vfr = cv3
 
-        self.log_text = tk.Text(log_inner, height=5, bg="#161b22",
-                                fg="#8b949e", font=("Consolas", 8),
-                                relief="flat", insertbackground="#c9d1d9",
-                                state="disabled")
+        # ── Bottom stats strip ────────────────────────────────────────────────
+        stats_strip = tk.Frame(self.root, bg=BG_CTRL, relief="groove", bd=1)
+        stats_strip.grid(row=2, column=0, sticky="ew", padx=6, pady=(0, 4))
+        stats_strip.columnconfigure(0, weight=1)
+        stats_strip.columnconfigure(1, weight=1)
+
+        self.abs_stat_var = tk.StringVar(value="UPS (Red): --    DNS (Blue): --")
+        self.vfr_stat_var = tk.StringVar(value="Mean= --  Min= --  Max= --  σ= --")
+
+        tk.Label(stats_strip, textvariable=self.abs_stat_var,
+                 bg=BG_CTRL, fg=FG_LABEL, font=FONT_STAT,
+                 anchor="w", justify="left").grid(row=0, column=0, sticky="w", padx=8, pady=2)
+        tk.Label(stats_strip, textvariable=self.vfr_stat_var,
+                 bg=BG_CTRL, fg=FG_LABEL, font=FONT_STAT,
+                 anchor="e", justify="right").grid(row=0, column=1, sticky="e", padx=8, pady=2)
+
+        # ── Raw log (collapsible bottom strip) ───────────────────────────────
+        log_frame = tk.Frame(self.root, bg=BG_MAIN)
+        log_frame.grid(row=3, column=0, sticky="ew", padx=6, pady=(0, 6))
+        tk.Label(log_frame, text="RAW LOG:", bg=BG_MAIN, fg=BORDER_CLR,
+                 font=FONT_STAT).pack(side=tk.LEFT, padx=(0, 4))
+        self.log_text = tk.Text(log_frame, height=3, bg="#1a1a2e",
+                                fg="#a0a0b0", font=FONT_MONO,
+                                relief="sunken", bd=2, state="disabled")
         self.log_text.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        sb = ttk.Scrollbar(log_inner, command=self.log_text.yview)
+        sb = ttk.Scrollbar(log_frame, command=self.log_text.yview)
         sb.pack(side=tk.RIGHT, fill=tk.Y)
         self.log_text["yscrollcommand"] = sb.set
+
+    # ── Helpers ───────────────────────────────────────────────────────────────
+    def _btn(self, parent, text, cmd, bg=BG_PANEL, fg=FG_LABEL):
+        return tk.Button(parent, text=text, command=cmd,
+                         bg=bg, fg=fg, font=FONT_BTN,
+                         relief="raised", bd=2, padx=8, pady=3,
+                         cursor="hand2",
+                         activebackground="#c0c0c0")
+
+    def _style_ax(self, ax, ylabel=""):
+        ax.set_facecolor(BG_PLOT)
+        ax.tick_params(colors="#333333", labelsize=7)
+        ax.set_xlabel("Time", fontsize=7, color="#555555")
+        ax.set_ylabel(ylabel, fontsize=7, color="#555555")
+        ax.grid(True, color="#dddddd", linewidth=0.5, linestyle="-")
+        ax.spines[:].set_color(BORDER_CLR)
+        ax.spines[:].set_linewidth(0.8)
+        for lbl in ax.get_xticklabels() + ax.get_yticklabels():
+            lbl.set_fontsize(7)
+            lbl.set_color("#333333")
+
+    # ── Filter controls ───────────────────────────────────────────────────────
+    def _on_filter_toggle(self):
+        if self.filter_enabled.get():
+            hz = self.cutoff_var.get()
+            self.filter_status_lbl.configure(text=f"[{hz:.1f} Hz]", fg=ACCENT_BLUE)
+            self.cutoff_slider.configure(state="normal")
+            self.cutoff_entry.configure(state="normal")
+            self._rebuild_filters()
+        else:
+            self.filter_status_lbl.configure(text="[OFF]", fg=ACCENT_RED)
+            self.cutoff_slider.configure(state="disabled")
+            self.cutoff_entry.configure(state="disabled")
+
+    def _on_cutoff_change(self, _=None):
+        hz = self.cutoff_var.get()
+        self.filter_status_lbl.configure(text=f"[{hz:.1f} Hz]")
+        self._rebuild_filters()
+
+    def _on_cutoff_commit(self, _=None):
+        try:
+            hz = float(self.cutoff_entry.get())
+            hz = max(1.0, min(hz, 200.0))
+            self.cutoff_var.set(hz)
+            self._on_cutoff_change()
+        except ValueError:
+            pass
+
+    def _validate_cutoff(self, val):
+        return val == "" or re.fullmatch(r"\d{0,4}(\.\d{0,2})?", val) is not None
+
+    def _rebuild_filters(self):
+        hz = self.cutoff_var.get()
+        b, a = _make_butter(hz, SAMPLE_RATE, LPF_ORDER)
+        zi   = lfilter_zi(b, a)
+        for ch in CHANNELS:
+            self.filter_b[ch] = b.copy()
+            self.filter_a[ch] = a.copy()
+            last = self.data[ch][-1] if self.data[ch] else 0.0
+            self.filter_zi[ch] = zi.copy() * last
 
     # ── Serial ────────────────────────────────────────────────────────────────
     def _refresh_ports(self):
@@ -244,11 +389,13 @@ class SerialMonitorApp:
         if ports:
             self.port_var.set(ports[0])
 
-    def _toggle_connect(self):
+    def _connect_wrap(self):
+        if not self.running:
+            self._connect()
+
+    def _disconnect_wrap(self):
         if self.running:
             self._disconnect()
-        else:
-            self._connect()
 
     def _connect(self):
         port = self.port_var.get()
@@ -262,10 +409,9 @@ class SerialMonitorApp:
             self.t0 = time.time()
             self.read_thread = threading.Thread(target=self._read_loop, daemon=True)
             self.read_thread.start()
-            self.connect_btn.configure(text="Disconnect", style="Danger.TButton")
-            self.status_var.set(f"Connected: {port} @ {baud}")
-            self.status_lbl.configure(foreground="#3fb950")
-            self._log(f"[Connected] {port} @ {baud} baud\n")
+            self.status_var.set(f"● {port} @ {baud}")
+            self._status_color(ACCENT_GREEN)
+            self._log(f"[Connected] {port} @ {baud}\n")
         except serial.SerialException as e:
             messagebox.showerror("Connection Error", str(e))
 
@@ -274,15 +420,26 @@ class SerialMonitorApp:
         if self.ser and self.ser.is_open:
             self.ser.close()
         self.ser = None
-        self.connect_btn.configure(text="Connect", style="Connect.TButton")
-        self.status_var.set("Disconnected")
-        self.status_lbl.configure(foreground="#f85149")
+        self.status_var.set("● Disconnected")
+        self._status_color(ACCENT_RED)
         self._log("[Disconnected]\n")
         if self.csv_file:
             self._stop_save()
 
+    def _status_color(self, color):
+        for w in self.root.winfo_children():
+            self._find_status_label(w, color)
+
+    def _find_status_label(self, widget, color):
+        try:
+            if hasattr(self, 'status_var') and isinstance(widget, tk.Label):
+                if widget.cget("textvariable") == str(self.status_var):
+                    widget.configure(fg=color)
+                    return
+        except Exception:
+            pass
+
     def _read_loop(self):
-        """Background thread: read lines and push to queue."""
         while self.running:
             try:
                 raw = self.ser.readline().decode("utf-8", errors="replace")
@@ -292,9 +449,8 @@ class SerialMonitorApp:
                 if self.running:
                     time.sleep(0.02)
 
-    # ── Queue drain (UI thread) ───────────────────────────────────────────────
+    # ── Queue drain ───────────────────────────────────────────────────────────
     def _poll_queue(self):
-        """Drain up to 50 items per tick to avoid UI freeze at high baud."""
         for _ in range(50):
             try:
                 raw = self.rx_queue.get_nowait()
@@ -305,47 +461,104 @@ class SerialMonitorApp:
             if result:
                 ch, val = result
                 t = time.time() - self.t0
-
-                # ── Apply IIR low-pass filter @ 3 Hz / 500 Hz ─────────────
-                filtered, self.filter_zi[ch] = lfilter(
-                    self.filter_b[ch], self.filter_a[ch],
-                    [val], zi=self.filter_zi[ch]
-                )
-                val_filtered = float(filtered[0])
-
-                self.data[ch].append(val_filtered)
-                self.times[ch].append(t)
-                self.stat_vars[ch].set(f"{val_filtered:.4e}")
+                if self.filter_enabled.get():
+                    filt, self.filter_zi[ch] = lfilter(
+                        self.filter_b[ch], self.filter_a[ch],
+                        [val], zi=self.filter_zi[ch])
+                    val_out = float(filt[0])
+                else:
+                    val_out = val
+                if not self.locked:
+                    self.data[ch].append(val_out)
+                    self.times[ch].append(t)
                 self.plot_dirty = True
                 if self.csv_writer:
                     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-                    self.csv_writer.writerow([ts, ch, f"{val_filtered:e}"])
-
+                    self.csv_writer.writerow([ts, ch, f"{val_out:e}"])
         self.root.after(self.POLL_MS, self._poll_queue)
 
     # ── Plot redraw ───────────────────────────────────────────────────────────
     def _schedule_plot(self):
         if self.plot_dirty:
-            self._redraw_plots()
+            self._redraw()
             self.plot_dirty = False
         self.root.after(self.PLOT_MS, self._schedule_plot)
 
-    def _redraw_plots(self):
-        for ch in CHANNELS:
-            xs = list(self.times[ch])
-            ys = list(self.data[ch])
-            if len(xs) < 2:
-                continue
-            self.lines[ch].set_data(xs, ys)
-            ax = self.axes[ch]
-            ax.set_xlim(xs[0], max(xs[-1], xs[0] + 1))
-            if ch == "VFR":
-                ax.set_ylim(0, 999)
+    def _redraw(self):
+        dirty_canvases = set()
+
+        # DToF
+        xs = list(self.times["DToF"])
+        ys = list(self.data["DToF"])
+        if len(xs) >= 2:
+            self.line_dtof.set_data(xs, ys)
+            self._autoscale(self.ax_dtof, xs, ys)
+            self._fmt_time_axis(self.ax_dtof, xs)
+            dirty_canvases.add(self.canvas_dtof)
+            self.dtof_stat_var.set(_stats_str(self.data["DToF"]))
+
+        # AbsTof UPS + DNS overlaid
+        xs_ups = list(self.times["AbsTof-UPS"])
+        ys_ups = list(self.data["AbsTof-UPS"])
+        xs_dns = list(self.times["AbsTof-DNS"])
+        ys_dns = list(self.data["AbsTof-DNS"])
+        if len(xs_ups) >= 2:
+            self.line_ups.set_data(xs_ups, ys_ups)
+            dirty_canvases.add(self.canvas_abs)
+        if len(xs_dns) >= 2:
+            self.line_dns.set_data(xs_dns, ys_dns)
+            dirty_canvases.add(self.canvas_abs)
+        if len(xs_ups) >= 2 or len(xs_dns) >= 2:
+            all_ys = ys_ups + ys_dns
+            all_xs = xs_ups  # use UPS timing for x-axis
+            if all_ys:
+                self._autoscale(self.ax_abs, all_xs, all_ys)
+                self._fmt_time_axis(self.ax_abs, all_xs)
+            ups_s = f"UPS (Red): {_stats_str(self.data['AbsTof-UPS'])}"
+            dns_s = f"DNS (Blue): {_stats_str(self.data['AbsTof-DNS'])}"
+            self.abs_stat_var.set(f"{ups_s}\n{dns_s}")
+
+        # VFR
+        xs_v = list(self.times["VFR"])
+        ys_v = list(self.data["VFR"])
+        if len(xs_v) >= 2:
+            self.line_vfr.set_data(xs_v, ys_v)
+            self._autoscale(self.ax_vfr, xs_v, ys_v)
+            self._fmt_time_axis(self.ax_vfr, xs_v)
+            dirty_canvases.add(self.canvas_vfr)
+            self.vfr_stat_var.set(_stats_str(self.data["VFR"]))
+
+        for cv in dirty_canvases:
+            cv.draw_idle()
+
+    def _autoscale(self, ax, xs, ys):
+        if not xs or not ys:
+            return
+        ax.set_xlim(xs[0], max(xs[-1], xs[0] + 1))
+        mn, mx = min(ys), max(ys)
+        mg = (mx - mn) * 0.15 if mx != mn else abs(mx) * 0.1 or 1.0
+        ax.set_ylim(mn - mg, mx + mg)
+
+    def _fmt_time_axis(self, ax, xs):
+        """Show elapsed seconds as HH:MM:SS-style ticks."""
+        if not xs:
+            return
+        ticks = ax.get_xticks()
+        labels = []
+        for t in ticks:
+            if xs[0] <= t <= xs[-1]:
+                m, s = divmod(int(t), 60)
+                h, m = divmod(m, 60)
+                labels.append(f"{h:02d}:{m:02d}:{s:02d}")
             else:
-                mn, mx = min(ys), max(ys)
-                margin = (mx - mn) * 0.15 if mx != mn else abs(mx) * 0.1 or 1e-6
-                ax.set_ylim(mn - margin, mx + margin)
-        self.canvas.draw_idle()
+                labels.append("")
+        ax.set_xticklabels(labels, fontsize=6, rotation=15)
+
+    # ── Lock toggle ───────────────────────────────────────────────────────────
+    def _toggle_lock(self):
+        self.locked = not self.locked
+        state = "LOCKED" if self.locked else "LIVE"
+        self._log(f"[Graphs {state}]\n")
 
     # ── CSV ───────────────────────────────────────────────────────────────────
     def _toggle_save(self):
@@ -358,41 +571,36 @@ class SerialMonitorApp:
         path = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
-            title="Save output CSV"
-        )
+            title="Save Waveforms")
         if not path:
             return
         self.csv_path   = path
         self.csv_file   = open(path, "w", newline="")
         self.csv_writer = csv.writer(self.csv_file)
         self.csv_writer.writerow(["Timestamp", "Channel", "Value"])
-        self.save_btn.configure(text="Stop Saving")
-        self._log(f"[Saving to] {path}\n")
+        self._log(f"[Saving] {path}\n")
 
     def _stop_save(self):
         if self.csv_file:
             self.csv_file.close()
-        self.csv_file   = None
-        self.csv_writer = None
-        self.save_btn.configure(text="Save CSV")
+        self.csv_file = self.csv_writer = None
         self._log(f"[Saved] {self.csv_path}\n")
 
-    # ── Helpers ───────────────────────────────────────────────────────────────
+    # ── Clear ─────────────────────────────────────────────────────────────────
     def _clear_data(self):
         for ch in CHANNELS:
             self.data[ch].clear()
             self.times[ch].clear()
-            self.stat_vars[ch].set("--")
-            # Reset filter state so history doesn't bleed into new data
-            b, a = _make_butter(LPF_CUTOFF, SAMPLE_RATE, LPF_ORDER)
-            self.filter_b[ch]  = b
-            self.filter_a[ch]  = a
-            self.filter_zi[ch] = lfilter_zi(b, a)
+        self._rebuild_filters()
         self.t0 = time.time()
+        self.dtof_stat_var.set("Mean= --  Min= --  Max= --  σ= --")
+        self.abs_stat_var.set("UPS (Red): --    DNS (Blue): --")
+        self.vfr_stat_var.set("Mean= --  Min= --  Max= --  σ= --")
         self.log_text.configure(state="normal")
         self.log_text.delete("1.0", tk.END)
         self.log_text.configure(state="disabled")
-        self._redraw_plots()
+        for cv in (self.canvas_dtof, self.canvas_abs, self.canvas_vfr):
+            cv.draw_idle()
 
     def _log(self, msg):
         self.log_text.configure(state="normal")
