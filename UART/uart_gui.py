@@ -6,7 +6,6 @@ Spirometer Serial Monitor GUI
 - Real-time Flow-Volume loop: exhalation above zero, inhalation below,
   x-axis = cumulative volume (integral of flow), matching clinical spirometry curves
 """
-
 import re
 import struct
 import threading
