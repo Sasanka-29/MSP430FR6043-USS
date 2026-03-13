@@ -54,43 +54,35 @@ The device encourages patients to take slow, deep breaths, helping keep the alve
 
 Traditional incentive spirometers are purely mechanical — a ball or piston rises in a chamber as the patient inhales. This project aims to **digitize** the incentive spirometer using ultrasonic flow sensing, enabling:
 
-| Feature | Traditional | This Project |
-|---|---|---|
-| Measurement | Visual (ball height) | Precise digital values |
-| Data Logging | ❌ None | ✅ CSV export & real-time graphs |
-| Remote Monitoring | ❌ Not possible | ✅ UART / future wireless |
-| Accuracy | Approximate | IEEE 754 float precision |
-| Moving Parts | Yes (ball/piston) | None (ultrasonic) |
+| Feature           | Traditional          | This Project                     |
+| ----------------- | -------------------- | -------------------------------- |
+| Measurement       | Visual (ball height) | Precise digital values           |
+| Data Logging      | ❌ None              | ✅ CSV export & real-time graphs |
+| Remote Monitoring | ❌ Not possible      | ✅ UART / future wireless        |
+| Accuracy          | Approximate          | IEEE 754 float precision         |
+| Moving Parts      | Yes (ball/piston)    | None (ultrasonic)                |
 
 ---
 
 ## 🏗️ System Architecture
 
-```
-                         ┌──────────────────────────┐
-                         │   Ultrasonic Transducers  │
-                         │   (Upstream & Downstream) │
-                         └────────────┬─────────────┘
-                                      │
-                                      ▼
-                    ┌──────────────────────────────────┐
-                    │         MSP430FR6043              │
-                    │    USS Module (ToF Measurement)   │
-                    │    Signal Processing & Firmware   │
-                    └──────┬──────────────────┬────────┘
-                           │                  │
-                  ┌────────▼───────┐  ┌───────▼──────────┐
-                  │   USS GUI       │  │   UART Output     │
-                  │  (TI Design     │  │  (Serial → PC)    │
-                  │   Center)       │  │                    │
-                  │                 │  │  ┌──────────────┐  │
-                  │  • Calibration  │  │  │ uart_parse.py│  │
-                  │  • Visualization│  │  │ (CLI batch)  │  │
-                  │  • Debugging    │  │  ├──────────────┤  │
-                  │                 │  │  │ uart_gui.py  │  │
-                  │                 │  │  │ (Live GUI)   │  │
-                  └─────────────────┘  │  └──────────────┘  │
-                                       └────────────────────┘
+```mermaid
+flowchart TD
+    Transducers["Ultrasonic Transducers<br/>(Upstream & Downstream)"]
+
+    MSP["MSP430FR6043<br/>USS Module (ToF Measurement)<br/>Signal Processing & Firmware"]
+
+    GUI["USS GUI<br/>(TI Design Center)<br/><br/>• Calibration<br/>• Visualization<br/>• Debugging"]
+
+    subgraph UART ["UART Output (Serial → PC)"]
+        direction TB
+        Script1["uart_parse.py<br/>(CLI batch)"]
+        Script2["uart_gui.py<br/>(Live GUI)"]
+    end
+
+    Transducers --> MSP
+    MSP --> GUI
+    MSP --> UART
 ```
 
 ---
@@ -99,14 +91,14 @@ Traditional incentive spirometers are purely mechanical — a ball or piston ris
 
 ### Current Development Platform
 
-| Component | Details |
-|---|---|
-| **MCU** | [TI MSP430FR6043](https://www.ti.com/product/MSP430FR6043) |
-| **Dev Board** | [EVM430-FR6043](https://www.ti.com/tool/EVM430-FR6043) Evaluation Module |
-| **Sensing** | Ultrasonic Sensing Solution (USS) — Time-of-Flight |
-| **Transducers** | Upstream & downstream ultrasonic transducer pair |
-| **IDE** | [Code Composer Studio (CCS)](https://www.ti.com/tool/CCSTUDIO) |
-| **Calibration** | [TI USS Design Center GUI](https://www.ti.com/tool/USS-DESIGN-CENTER) |
+| Component       | Details                                                                  |
+| --------------- | ------------------------------------------------------------------------ |
+| **MCU**         | [TI MSP430FR6043](https://www.ti.com/product/MSP430FR6043)               |
+| **Dev Board**   | [EVM430-FR6043](https://www.ti.com/tool/EVM430-FR6043) Evaluation Module |
+| **Sensing**     | Ultrasonic Sensing Solution (USS) — Time-of-Flight                       |
+| **Transducers** | Upstream & downstream ultrasonic transducer pair                         |
+| **IDE**         | [Code Composer Studio (CCS)](https://www.ti.com/tool/CCSTUDIO)           |
+| **Calibration** | [TI USS Design Center GUI](https://www.ti.com/tool/USS-DESIGN-CENTER)    |
 
 ### Planned Custom PCB
 
@@ -124,21 +116,21 @@ The next phase of this project involves designing a **custom PCB** to replace th
 
 ### Firmware / Embedded
 
-| Technology | Purpose |
-|---|---|
-| MSP430FR6043 | Ultra-low-power MCU with USS module |
-| USS Library | TI's ultrasonic sensing signal processing |
-| Code Composer Studio | IDE for firmware development |
-| USS Design Center | Transducer calibration & flow config |
+| Technology           | Purpose                                   |
+| -------------------- | ----------------------------------------- |
+| MSP430FR6043         | Ultra-low-power MCU with USS module       |
+| USS Library          | TI's ultrasonic sensing signal processing |
+| Code Composer Studio | IDE for firmware development              |
+| USS Design Center    | Transducer calibration & flow config      |
 
 ### Software / Host PC
 
-| Technology | Purpose |
-|---|---|
+| Technology  | Purpose                            |
+| ----------- | ---------------------------------- |
 | Python 3.7+ | Host-side data acquisition scripts |
-| pyserial | Serial UART communication |
-| matplotlib | Real-time 4-channel graph plotting |
-| Tkinter | GUI framework for serial monitor |
+| pyserial    | Serial UART communication          |
+| matplotlib  | Real-time 4-channel graph plotting |
+| Tkinter     | GUI framework for serial monitor   |
 
 ---
 
@@ -148,22 +140,22 @@ There are **two methods** to obtain spirometry readings from the MSP430FR6043:
 
 ### Method 1: USS Design Center GUI
 
-| Aspect | Details |
-|---|---|
-| **Connection** | USB to EVM430-FR6043 |
-| **Software** | TI USS Design Center GUI |
-| **Best For** | Development, calibration, debugging |
+| Aspect          | Details                             |
+| --------------- | ----------------------------------- |
+| **Connection**  | USB to EVM430-FR6043                |
+| **Software**    | TI USS Design Center GUI            |
+| **Best For**    | Development, calibration, debugging |
 | **Data Format** | Visual plots + internal data export |
 
 ### Method 2: UART Communication ⭐
 
-| Aspect | Details |
-|---|---|
-| **Connection** | USB/Serial to MSP430FR6043 |
-| **Software** | `uart_gui.py` (live) or `uart_parse.py` (batch) |
-| **Best For** | Standalone operation, data logging, integration |
-| **Data Format** | `<delimiter>,<hex IEEE754>` → decoded float |
-| **Channels** | AbsTof-UPS (`$`), AbsTof-DNS (`#`), DToF (`%`), VFR (`!`) |
+| Aspect          | Details                                                   |
+| --------------- | --------------------------------------------------------- |
+| **Connection**  | USB/Serial to MSP430FR6043                                |
+| **Software**    | `uart_gui.py` (live) or `uart_parse.py` (batch)           |
+| **Best For**    | Standalone operation, data logging, integration           |
+| **Data Format** | `<delimiter>,<hex IEEE754>` → decoded float               |
+| **Channels**    | AbsTof-UPS (`$`), AbsTof-DNS (`#`), DToF (`%`), VFR (`!`) |
 
 > 📖 **See the full UART documentation:** [`Spirometer/UART/README.md`](Spirometer/UART/README.md)
 
@@ -196,23 +188,25 @@ MSP430FR6043-USS/
 
 ### Prerequisites
 
-| Requirement | Link |
-|---|---|
-| Code Composer Studio (CCS) | [Download](https://www.ti.com/tool/CCSTUDIO) |
-| TI USS Design Center GUI | [Download](https://www.ti.com/tool/USS-DESIGN-CENTER) |
+| Requirement                  | Link                                                  |
+| ---------------------------- | ----------------------------------------------------- |
+| Code Composer Studio (CCS)   | [Download](https://www.ti.com/tool/CCSTUDIO)          |
+| TI USS Design Center GUI     | [Download](https://www.ti.com/tool/USS-DESIGN-CENTER) |
 | EVM430-FR6043 (or custom HW) | [Product Page](https://www.ti.com/tool/EVM430-FR6043) |
-| Python 3.7+ | [Download](https://www.python.org/downloads/) |
-| USB Cable | For programming & UART |
+| Python 3.7+                  | [Download](https://www.python.org/downloads/)         |
+| USB Cable                    | For programming & UART                                |
 
 ### Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/Sasanka-29/MSP430FR6043-USS.git
    cd MSP430FR6043-USS
    ```
 
 2. **Install Python dependencies** (for UART tools)
+
    ```bash
    pip install pyserial matplotlib
    ```
@@ -235,6 +229,7 @@ MSP430FR6043-USS/
    Use the TI Design Center for visualization
 
    **Option B — UART (Recommended for data logging):**
+
    ```bash
    # Real-time GUI monitor
    cd Spirometer/UART
