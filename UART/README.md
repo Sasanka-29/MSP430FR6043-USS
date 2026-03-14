@@ -359,6 +359,6 @@ Ensure the MSP430FR6043 firmware is configured with matching UART settings:
 ---
 
 <p align="center">
-  <!-- <b>Part of the <a href="https://github.com/Sasanka-29/MSP430FR6043-USS">MSP430FR6043-USS Spirometer</a> project</b><br> -->
+  <b>Part of the <a href="https://github.com/Sasanka-29/MSP430FR6043-USS">MSP430FR6043-USS Spirometer</a> project</b><br>
   <i>Designed & Developed by <a href="https://github.com/Sasanka-29">Sasanka-29</a></i>
 </p>
