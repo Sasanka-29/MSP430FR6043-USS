@@ -174,12 +174,12 @@ flowchart TD
 
 ## 📁 File Descriptions
 
-| File                        | Description                                                                                                                                                                            |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `uart_parse.py`             | **CLI parser** — Reads a raw hex CSV (`hex_in.csv`), decodes each line using the delimiter dictionary and IEEE 754 conversion, and writes decoded output to a new CSV (`hex_out.csv`). |
-| `uart_gui.py`               | **GUI application** — Full-featured Tkinter clinical monitor with live spirometry metrics (Exhale/Inhale states), Flow-Volume loops, real-time VFR, and CSV exporter.                  |
-| `hex_in.csv`                | **Sample raw input** — Example UART data captured from the MSP430FR6043 (delimiter + hex pairs).                                                                                       |
-| `hex_out.csv`               | **Sample decoded output** — Parsed output from `uart_parse.py` showing channel names and decoded float values in scientific notation.                                                  |
+| File            | Description                                                                                                                                                                            |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `uart_parse.py` | **CLI parser** — Reads a raw hex CSV (`hex_in.csv`), decodes each line using the delimiter dictionary and IEEE 754 conversion, and writes decoded output to a new CSV (`hex_out.csv`). |
+| `uart_gui.py`   | **GUI application** — Full-featured Tkinter clinical monitor with live spirometry metrics (Exhale/Inhale states), Flow-Volume loops, real-time VFR, and CSV exporter.                  |
+| `hex_in.csv`    | **Sample raw input** — Example UART data captured from the MSP430FR6043 (delimiter + hex pairs).                                                                                       |
+| `hex_out.csv`   | **Sample decoded output** — Parsed output from `uart_parse.py` showing channel names and decoded float values in scientific notation.                                                  |
 
 ---
 
@@ -308,26 +308,26 @@ Based on the included `hex_in.csv` → `hex_out.csv`:
 
 ## 🎨 GUI Features
 
-| Feature                      | Description                                                                                          |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 🔌 **Auto Port Detection**   | Scans and lists all available COM ports                                                              |
-| 🫁 **Flow-Volume Loop**      | Real-time spirometry flow-volume loop generation                                                     |
-| 📈 **Live Flow Graph**       | Real-time Volume Flow Rate (VFR) vs Time rolling plot                                                |
-| 📊 **Spirometry Metrics**    | Automatic calculation of **PEF, PIF, FVC, FEV1**, and **FEV1/FVC ratio**                             |
-| ⚖️ **Baseline Calibration**  | Zero-flow offset calibration with adjustable deadband                                                |
-| 📝 **Breath History Log**    | Scrollable history of localized breath cycle events and individual metrics                           |
-| 💾 **CSV Export**            | One-click save to timestamped CSV file                                                               |
-| ↺ **Port Refresh**           | Rescan COM ports without restarting                                                                  |
-| ✕ **Clear Data**             | Reset all buffers and graphs                                                                         |
+| Feature                     | Description                                                                |
+| --------------------------- | -------------------------------------------------------------------------- |
+| 🔌 **Auto Port Detection**  | Scans and lists all available COM ports                                    |
+| 🫁 **Flow-Volume Loop**     | Real-time spirometry flow-volume loop generation                           |
+| 📈 **Live Flow Graph**      | Real-time Volume Flow Rate (VFR) vs Time rolling plot                      |
+| 📊 **Spirometry Metrics**   | Automatic calculation of **PEF, PIF, FVC, FEV1**, and **FEV1/FVC ratio**   |
+| ⚖️ **Baseline Calibration** | Zero-flow offset calibration with adjustable deadband                      |
+| 📝 **Breath History Log**   | Scrollable history of localized breath cycle events and individual metrics |
+| 💾 **CSV Export**           | One-click save to timestamped CSV file                                     |
+| ↺ **Port Refresh**          | Rescan COM ports without restarting                                        |
+| ✕ **Clear Data**            | Reset all buffers and graphs                                               |
 
 ### GUI Plot Color Coding
 
-| Entity          | Color                  |
-| --------------- | ---------------------- |
-| Exhalation      | 🟦 Dark Blue             |
-| Inhalation      | 🟥 Dark Red              |
-| Live VFR        | 🟨 Amber                |
-| Completed Loop  | 🔵 Navy / Shaded         |
+| Entity         | Color            |
+| -------------- | ---------------- |
+| Exhalation     | 🟦 Dark Blue     |
+| Inhalation     | 🟥 Dark Red      |
+| Live VFR       | 🟨 Amber         |
+| Completed Loop | 🔵 Navy / Shaded |
 
 ---
 
