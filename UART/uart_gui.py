@@ -142,31 +142,33 @@ class SerialMonitorApp:
         self.cal_start_time  = 0.0
 
         # ── Flow-Volume loop state ────────────────────────────────────────────
-        # A full breath cycle = one exhalation + one inhalation (or vice versa)
-        # We accumulate volume by integrating flow over time.
         self.breath_state    = self.STATE_IDLE
         self.breath_start_t  = 0.0
         self.breath_count    = 0
 
         # Buffers for the CURRENT in-progress breath segment (flow vs volume)
-        self.seg_vol  = []    # cumulative volume within this segment (L)
-        self.seg_flow = []    # flow values (L/m) — kept as-is for y-axis
+        self.seg_vol  = []
+        self.seg_flow = []
 
         # The last completed full loop (exhalation + inhalation combined)
-        self.loop_vol  = []   # volume axis for completed loop
-        self.loop_flow = []   # flow axis for completed loop
+        self.loop_vol  = []
+        self.loop_flow = []
 
         # Accumulated volume tracker across the full cycle
-        self.cycle_vol_acc    = 0.0   # running volume accumulator (L)
-        self.exhale_vol       = 0.0   # total exhaled volume
-        self.exhale_peak_flow = 0.0   # PEF
+        self.cycle_vol_acc    = 0.0
+        self.exhale_vol       = 0.0
+        self.exhale_peak_flow = 0.0
         self.inhale_peak_flow = 0.0
-        self.fev1_flow_pts    = []    # flow samples in first 1s of exhalation
-        self.fev1_vol_pts     = []    # volume during first 1s
+        self.fev1_flow_pts    = []
+        self.fev1_vol_pts     = []
 
         # Live partial loop (drawn in real time as user breathes)
         self.live_vol  = []
         self.live_flow = []
+
+        # ── FIX: saved exhale live data so inhale can continue from it ────────
+        self.exhale_live_vol  = []
+        self.exhale_live_flow = []
 
         # ── Serial / CSV ──────────────────────────────────────────────────────
         self.rx_queue = queue.Queue()
@@ -248,10 +250,10 @@ class SerialMonitorApp:
         mid.grid(row=1, column=0, sticky="nsew", padx=6, pady=2)
         mid.columnconfigure(0, weight=3)
         mid.columnconfigure(1, weight=2)
-        mid.rowconfigure(0, weight=0)   # calibration strip
-        mid.rowconfigure(1, weight=1)   # live VFR
-        mid.rowconfigure(2, weight=0)   # stats
-        mid.rowconfigure(3, weight=2)   # flow-volume loop
+        mid.rowconfigure(0, weight=0)
+        mid.rowconfigure(1, weight=1)
+        mid.rowconfigure(2, weight=0)
+        mid.rowconfigure(3, weight=2)
 
         # ── Calibration panel ─────────────────────────────────────────────────
         cal_frame = tk.LabelFrame(mid, text="Baseline Calibration  (Ensure No Flow)",
@@ -290,7 +292,7 @@ class SerialMonitorApp:
                    font=FONT_LABEL, bg="white").pack(side=tk.LEFT, padx=(4, 4))
         tk.Label(thr_row, text="L/m", bg=BG_CAL, fg=FG_LABEL, font=FONT_LABEL).pack(side=tk.LEFT)
 
-        # ── Live VFR plot (top-left) ───────────────────────────────────────────
+        # ── Live VFR plot ──────────────────────────────────────────────────────
         vfr_lf = tk.LabelFrame(mid, text="Volume Flow Rate — Live (Flow vs Time)",
                                bg=BG_MAIN, fg=FG_LABEL,
                                font=FONT_TITLE, relief="groove", bd=2)
@@ -317,7 +319,7 @@ class SerialMonitorApp:
                  bg=BG_MAIN, fg=FG_LABEL, font=FONT_STAT).grid(
                  row=2, column=0, sticky="ew", pady=(2, 2))
 
-        # ── Breath state panel (top-right) ────────────────────────────────────
+        # ── Breath state panel ────────────────────────────────────────────────
         state_lf = tk.LabelFrame(mid, text="Breath State",
                                  bg=BG_BREATH, fg=ACCENT_GREEN,
                                  font=FONT_TITLE, relief="groove", bd=2)
@@ -329,7 +331,6 @@ class SerialMonitorApp:
                                          bg=BG_BREATH, fg=BORDER_CLR, font=FONT_BIG)
         self.breath_state_lbl.pack(pady=(10, 4))
 
-        # Live metric labels
         metrics_frame = tk.Frame(state_lf, bg=BG_BREATH)
         metrics_frame.pack(fill=tk.X, padx=10)
 
@@ -353,7 +354,6 @@ class SerialMonitorApp:
             tk.Label(metrics_frame, textvariable=sv, bg=BG_BREATH,
                      fg=col, font=("Arial", 9), anchor="w").pack(fill=tk.X, pady=1)
 
-        # Breath history listbox
         tk.Label(state_lf, text="History:", bg=BG_BREATH,
                  fg=FG_LABEL, font=FONT_STAT).pack(anchor="w", padx=10, pady=(8, 0))
         hist_outer = tk.Frame(state_lf, bg=BG_BREATH)
@@ -366,7 +366,7 @@ class SerialMonitorApp:
         hs.pack(side=tk.RIGHT, fill=tk.Y)
         self.breath_hist_box["yscrollcommand"] = hs.set
 
-        # ── Flow-Volume Loop plot (bottom-left) ───────────────────────────────
+        # ── Flow-Volume Loop plot ──────────────────────────────────────────────
         fvl_lf = tk.LabelFrame(mid, text="Flow-Volume Loop  (Exhalation ↑  /  Inhalation ↓)",
                                bg=BG_MAIN, fg=FG_LABEL,
                                font=FONT_TITLE, relief="groove", bd=2)
@@ -381,20 +381,16 @@ class SerialMonitorApp:
         self.ax_fvl.axhline(0, color="#999999", linewidth=0.8, linestyle="--")
         self.ax_fvl.axvline(0, color="#cccccc", linewidth=0.5, linestyle=":")
 
-        # Completed loop — solid dark line
         self.line_loop,  = self.ax_fvl.plot([], [], color=COL_LOOP,
                                               linewidth=1.6, antialiased=True,
                                               zorder=3)
-        # Exhalation segment of live breath — blue
         self.line_exhale_live, = self.ax_fvl.plot([], [], color=COL_EXHALE,
                                                     linewidth=1.4, antialiased=True,
                                                     linestyle="--", zorder=4)
-        # Inhalation segment of live breath — red
         self.line_inhale_live, = self.ax_fvl.plot([], [], color=COL_INHALE,
                                                     linewidth=1.4, antialiased=True,
                                                     linestyle="--", zorder=4)
 
-        # Annotation text objects for PEF, FVC, FEV1
         self.ann_pef  = self.ax_fvl.annotate("", xy=(0,0), xytext=(0,0),
                             fontsize=7, color=COL_EXHALE,
                             arrowprops=dict(arrowstyle="-", color=COL_EXHALE, lw=0.8))
@@ -408,7 +404,7 @@ class SerialMonitorApp:
         cv_fvl.get_tk_widget().grid(row=0, column=0, sticky="nsew")
         self.canvas_fvl = cv_fvl
 
-        # ── Blank bottom-right (keeps grid balanced) ──────────────────────────
+        # ── Spirometry Parameters panel ───────────────────────────────────────
         ph = tk.LabelFrame(mid, text="Spirometry Parameters",
                            bg=BG_BREATH, fg=ACCENT_GREEN,
                            font=FONT_TITLE, relief="groove", bd=2)
@@ -504,11 +500,15 @@ class SerialMonitorApp:
     def _process_sample(self, flow_lm, t):
         """
         Integrate flow to build the Flow-Volume loop in real time.
-        Convention (matches the reference image):
+        Convention (matches clinical spirometry):
           - Exhalation: flow > 0  → plotted ABOVE zero
           - Inhalation: flow < 0  → plotted BELOW zero
           - Volume x-axis: increases during exhalation (left→right),
             decreases back during inhalation (right→left), closing the loop.
+
+        FIX: exhale_live_vol/flow are saved at the exhale→inhale transition
+        so that the inhale segment correctly continues from the exhalation
+        endpoint instead of restarting from the origin.
         """
         dt   = t - self.t_prev
         self.t_prev = t
@@ -532,8 +532,12 @@ class SerialMonitorApp:
                 self.seg_flow        = [flow_lm]
                 self.live_vol        = [0.0]
                 self.live_flow       = [flow_lm]
+                # Reset saved exhale buffers for the new cycle
+                self.exhale_live_vol  = []
+                self.exhale_live_flow = []
+
             elif flow_lm < -thr:
-                # Start of inhalation (standalone, no preceding exhalation)
+                # Start of standalone inhalation (no preceding exhalation)
                 self.breath_state    = self.STATE_INHALE
                 self.breath_start_t  = t
                 self.cycle_vol_acc   = 0.0
@@ -541,6 +545,8 @@ class SerialMonitorApp:
                 self.seg_flow        = [flow_lm]
                 self.live_vol        = [0.0]
                 self.live_flow       = [flow_lm]
+                self.exhale_live_vol  = []
+                self.exhale_live_flow = []
 
         elif self.breath_state == self.STATE_EXHALE:
             self.cycle_vol_acc += dv
@@ -558,11 +564,18 @@ class SerialMonitorApp:
                 self.fev1_vol_pts.append(self.cycle_vol_acc)
 
             if flow_lm <= thr:
-                # Exhalation ended — save exhaled volume
+                # Exhalation ended — save total exhaled volume
                 self.exhale_vol = self.cycle_vol_acc
-                # Transition to inhalation phase (stay at same volume point)
+
+                # ── FIX: save the complete exhale live buffers ────────────────
+                # This allows the inhale segment to continue from where
+                # exhalation ended rather than restarting from the origin.
+                self.exhale_live_vol  = self.live_vol[:]
+                self.exhale_live_flow = self.live_flow[:]
+                # ─────────────────────────────────────────────────────────────
+
+                # Transition to inhalation — stay at same volume endpoint
                 self.breath_state = self.STATE_INHALE
-                # Keep accumulating from exhale endpoint
                 self.seg_vol  = [self.cycle_vol_acc]
                 self.seg_flow = [flow_lm]
 
@@ -574,9 +587,12 @@ class SerialMonitorApp:
             if abs(flow_lm) > self.inhale_peak_flow:
                 self.inhale_peak_flow = abs(flow_lm)
 
-            # Append inhalation to live loop (continues from exhalation end)
-            self.live_vol  = self.live_vol + self.seg_vol[1:]
-            self.live_flow = self.live_flow + self.seg_flow[1:]
+            # ── FIX: extend from saved exhale data, not from stale live_vol ──
+            # Previously: self.live_vol = self.live_vol + self.seg_vol[1:]
+            # That was empty because live_vol had been overwritten.
+            self.live_vol  = self.exhale_live_vol + self.seg_vol[1:]
+            self.live_flow = self.exhale_live_flow + self.seg_flow[1:]
+            # ─────────────────────────────────────────────────────────────────
 
             if flow_lm >= -thr:
                 # Inhalation ended — complete the loop
@@ -588,18 +604,16 @@ class SerialMonitorApp:
             self.breath_state = self.STATE_IDLE
             return
 
-        # Compute spirometry parameters
-        fvc  = self.exhale_vol                      # L
-        pef  = self.exhale_peak_flow                # L/m
-        pif  = self.inhale_peak_flow                # L/m
-        fev1_vol = self.fev1_vol_pts[-1] if self.fev1_vol_pts else 0.0   # L
-        ratio = (fev1_vol / fvc * 100) if fvc > 0 else 0.0
+        fvc      = self.exhale_vol
+        pef      = self.exhale_peak_flow
+        pif      = self.inhale_peak_flow
+        fev1_vol = self.fev1_vol_pts[-1] if self.fev1_vol_pts else 0.0
+        ratio    = (fev1_vol / fvc * 100) if fvc > 0 else 0.0
 
         self.breath_count += 1
         self.loop_vol  = self.live_vol[:]
         self.loop_flow = self.live_flow[:]
 
-        # Update parameter labels
         self.pef_var.set(  f"PEF:  {pef:.1f}  L/m")
         self.fvc_var.set(  f"FVC:  {fvc:.4f}  L")
         self.fev1_var.set( f"FEV1: {fev1_vol:.4f}  L")
@@ -612,7 +626,6 @@ class SerialMonitorApp:
         self.param_ratio_var.set(f"FEV1 / FVC                    {ratio:.1f}%")
         self.param_pif_var.set(  f"PIF  (Peak Inspiratory Flow)  {pif:.1f} L/m")
 
-        # History log
         self.breath_hist_box.insert(
             tk.END,
             f"#{self.breath_count:3d}  PEF={pef:.0f}  FVC={fvc:.3f}L  dur={dur:.2f}s")
@@ -621,9 +634,11 @@ class SerialMonitorApp:
                   f"FEV1={fev1_vol:.4f}L ratio={ratio:.1f}%\n")
 
         # Clear live buffers
-        self.live_vol  = []
-        self.live_flow = []
-        self.breath_state = self.STATE_IDLE
+        self.live_vol         = []
+        self.live_flow        = []
+        self.exhale_live_vol  = []
+        self.exhale_live_flow = []
+        self.breath_state     = self.STATE_IDLE
 
     # ── Redraw ────────────────────────────────────────────────────────────────
     def _update_breath_state_ui(self):
@@ -645,7 +660,6 @@ class SerialMonitorApp:
         self.breath_count_var.set(f"Breath cycles: {self.breath_count}")
 
     def _redraw_fvl(self):
-        """Redraw the Flow-Volume loop plot."""
         ax = self.ax_fvl
         dirty = False
 
@@ -661,8 +675,7 @@ class SerialMonitorApp:
             self.line_inhale_live.set_data([], [])
             dirty = True
         elif state == self.STATE_INHALE and len(self.live_vol) >= 2:
-            # Split live loop: exhale part (flow>0) and inhale part (flow<0)
-            # Find split index (where inhalation started)
+            # Split live loop into exhale portion (flow>0) and inhale portion (flow<0)
             split = next((i for i, f in enumerate(self.live_flow) if f < 0), None)
             if split is not None:
                 self.line_exhale_live.set_data(
@@ -678,7 +691,7 @@ class SerialMonitorApp:
                 self.line_exhale_live.set_data([], [])
                 self.line_inhale_live.set_data([], [])
 
-        # Auto-scale axes to the union of loop + live data
+        # Auto-scale axes
         all_v = self.loop_vol + self.live_vol
         all_f = self.loop_flow + self.live_flow
         if len(all_v) >= 2:
@@ -700,7 +713,6 @@ class SerialMonitorApp:
         self.root.after(self.PLOT_MS, self._schedule_plot)
 
     def _redraw(self):
-        # Live VFR (flow vs time)
         xs_v = list(self.times["VFR"])
         ys_v = list(self.data["VFR"])
         if len(xs_v) >= 2:
@@ -711,7 +723,6 @@ class SerialMonitorApp:
             self.vfr_stat_var.set(_stats_str(self.data["VFR"]))
             self.canvas_vfr.draw_idle()
 
-        # Flow-Volume loop
         self._redraw_fvl()
         self._update_breath_state_ui()
 
@@ -898,11 +909,18 @@ class SerialMonitorApp:
         self.breath_state     = self.STATE_IDLE
         self.breath_count     = 0
         self.cycle_vol_acc    = 0.0
-        self.seg_vol = self.seg_flow = []
-        self.live_vol = self.live_flow = []
-        self.loop_vol = self.loop_flow = []
-        self.exhale_peak_flow = self.inhale_peak_flow = 0.0
-        self.fev1_flow_pts = self.fev1_vol_pts = []
+        self.seg_vol          = []
+        self.seg_flow         = []
+        self.live_vol         = []
+        self.live_flow        = []
+        self.loop_vol         = []
+        self.loop_flow        = []
+        self.exhale_live_vol  = []   # FIX: reset saved exhale buffers
+        self.exhale_live_flow = []   # FIX: reset saved exhale buffers
+        self.exhale_peak_flow = 0.0
+        self.inhale_peak_flow = 0.0
+        self.fev1_flow_pts    = []
+        self.fev1_vol_pts     = []
 
         self.breath_hist_box.delete(0, tk.END)
         self.breath_count_var.set("Breath cycles: 0")
