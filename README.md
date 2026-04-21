@@ -1,4 +1,4 @@
-# 🫁 Incentive Spirometer — MSP430FR6043 USS
+# 🫁 Spirometer — MSP430FR6043 USS
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: MSP430](https://img.shields.io/badge/Platform-MSP430FR6043-red.svg)](https://www.ti.com/product/MSP430FR6043)
