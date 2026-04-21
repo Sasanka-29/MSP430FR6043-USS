@@ -22,7 +22,7 @@ Homepage"), etc.) to the appropriate COM port.
 
 * The connection should have the following settings:
     ```
-     Baud-rate:     115200
+     Baud-rate:     230400
      Data bits:          8
      Stop bits:          1
      Parity:          None
