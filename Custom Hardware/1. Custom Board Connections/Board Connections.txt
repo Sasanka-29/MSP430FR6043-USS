@@ -1,0 +1,21 @@
+To ensure the custom MSP430FR6043 PCB communicates correctly with both the sensors and the host PC, the following primary connections are established:
+
+Ultrasonic Transducers: The upstream and downstream Jiakang 200kHz air transducers are connected directly to the analog front-end USS channels (equivalent to the X1 and X2 pins on the evaluation module).
+Clocking Infrastructure: A high-precision external crystal oscillator is connected to the MCU's designated oscillator pins, flanked by two 33 pF load capacitors to ground.
+Data Telemetry (UART): The UART TX, RX, and GND pins are routed to a USB-to-Serial bridge. This pipeline continuously transmits the calculated Absolute Time of Flight (AbsToF for UPS and DNS), Delta ToF (DToF), and Volume Flow Rate (VFR) to the custom Python GUI.
+Programming Interface: The ezFET/JTAG pins are exposed to allow seamless firmware flashing using the TI Uniflash tool.
+
+
+Hardware Configuration & Wiring
+
+To program and communicate with the custom board, I am using the ezFET section of the EVM430-FR6043. I have removed jumpers J1, J2, and J3 to isolate the EVM MCU and established the following connections between the EVM ezFET headers and my custom board:
+
+Comms: EVM (RXD/TXD on J3) → Custom Board (TP18 RXD / TP19 TXD)
+
+I2C: EVM (SCL/SDA on J1) → Custom Board (SCL/SDA on J1)
+
+Control: EVM (RST/TEST on J3) → Custom Board (TP1 Reset / TP20 Test)
+
+Interrupt: EVM (IRQ on J1) → Custom Board (IRQ on J1)
+
+Power: EVM (VCC/GND) → Custom Board (TP21 VCC / Pin 6 GND)

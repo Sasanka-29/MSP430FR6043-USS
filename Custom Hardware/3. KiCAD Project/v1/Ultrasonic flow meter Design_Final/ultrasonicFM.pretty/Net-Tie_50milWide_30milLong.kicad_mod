@@ -1,0 +1,74 @@
+(footprint "Net-Tie_50milWide_30milLong"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 1.27 0.474345 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "65f06241-f708-4760-89a1-8439c56761d2")
+		(effects
+			(font
+				(size 0.762 0.762)
+				(thickness 0.1524)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Value" "Net-Tie"
+		(at -0.5969 2.44856 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "1f772ac3-59f6-43ad-b05e-8b6bf199733f")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "090d6b74-c8f3-4742-aef1-932a999ee3fa")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d187b82b-b576-4d91-a91d-484ddefaf1ee")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -0.381 0)
+		(size 0.762 1.27)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin -0.508)
+		(solder_paste_margin -0.508)
+		(uuid "d6581968-df6e-4eba-9eca-d7b808e66ae7")
+	)
+	(pad "2" smd rect
+		(at 0.381 0)
+		(size 0.762 1.27)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(solder_mask_margin -0.508)
+		(solder_paste_margin -0.508)
+		(uuid "40a25441-55f2-483b-947f-8d54b2fb94b1")
+	)
+	(embedded_fonts no)
+)

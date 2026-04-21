@@ -1,0 +1,96 @@
+(footprint "AssemblyNoteLabel"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 101.41204 -0.4953 270)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "3f929b73-7ca4-4bd0-b3a3-0f83b7851666")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Value" "This Assembly Note is for PCB labels only"
+		(at -2.32156 -0.4953 270)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "f79bf013-0ebb-4e7f-b7c8-24f89f711bcf")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "20aee43d-4165-4a76-847f-499375d3aa9e")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b1a77749-383f-43d5-97ae-3ae74425b4a9")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_rect
+		(start -0.50799 0.508)
+		(end 0.50801 -0.508)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "User.5")
+		(uuid "bf013d07-3c13-4a45-ae68-c14b652c8a37")
+	)
+	(fp_text user "Install label in silkscreened box after final wash.  Text shall be 8 pt font.  Text shall be per the Label Table in the PDF schematic."
+		(at 1.143 0.63246 0)
+		(unlocked yes)
+		(layer "User.5")
+		(uuid "7c2ed518-83b8-457d-ba34-eaeccc595195")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "${REFERENCE}"
+		(at -4.191 0.63246 0)
+		(unlocked yes)
+		(layer "User.5")
+		(uuid "ddfeca1c-bd51-479a-b8ee-d7afd60d4f18")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(embedded_fonts no)
+)

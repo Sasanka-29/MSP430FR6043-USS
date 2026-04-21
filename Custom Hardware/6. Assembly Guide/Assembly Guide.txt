@@ -1,0 +1,15 @@
+To assemble the physical spirometer prototype and establish the programming interface for testing:
+
+Transducer Mounting: Insert the Jiakang 200kHz transducers into the designated upstream and downstream ports of the plastic flow pipe. Ensure an airtight fit to prevent flow leakage.
+
+Wiring: Route the transducer leads to the respective TX1 and RX1 input/output pins on the custom MSP430FR6043 PCB.
+
+Telemetry Hookup: Connect the custom board's UART TX and GND pins to an FTDI serial adapter, and then connect the FTDI adapter to your PC. This establishes the data pipeline for your host-side applications.
+
+Power & Flash: The EVM430FR6043 board is utilized as the programmer and power source for the custom PCB.
+
+	Connect the TEST and RST pins of the custom board to the corresponding TEST and RST pins on the EVM board.
+
+	Supply power by connecting the 3V3 and GND pins of the custom board to the J2 jumper on the EVM.
+
+Once the hardware bridge is established, use the Uniflash tool or CSS code to burn the updated firmware (containing the 5000 μs settling time and the low-power capture toggles).

@@ -1,0 +1,9 @@
+Establishing a perfect baseline is critical for an accurate multitone ultrasonic system. The calibration process is executed as follows:
+
+Physical Isolation: Completely seal and tape both ends of the plastic flow pipe. This guarantees absolute zero air movement and prevents ambient room drafts from skewing the baseline.
+
+Resonance Sweeping: Open the TI USS Design Center GUI and initiate an F1 to F2 frequency sweep (e.g., from 250 kHz to 346 kHz) to identify the exact resonant peak of the transducers inside the pipe. Once the peak is found, define F1 and F2 at the 50% amplitude points on either side of the curve (e.g., 275 kHz and 320 kHz).
+
+Gain Optimization: Adjust the Programmable Gain Amplifier (PGA) to 7.7 dB. Monitor the ADC Capture tab to ensure the waveform hits a target of roughly ±900 ADC counts, keeping the signal robustly above the ±150 count background noise floor.
+
+Meter Constant Tuning: While monitoring the Delta ToF and Volume Flow Rate, adjust the Meter Constant (optimized to 91 for this setup). The goal is to align the GUI output to 0 L/h while ensuring the standard deviation (σ) remains as low as possible (e.g., ~1.31 ns for Delta ToF)

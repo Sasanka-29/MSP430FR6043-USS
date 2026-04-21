@@ -1,0 +1,9 @@
+During the migration from the EVM to the miniaturized custom board, several critical hardware and physical issues emerged that halted accurate data capture:
+
+Acoustic Impedance & Signal Loss: The initial 300kHz transducers performed well in open air but suffered massive signal degradation and unpredictable resonance shifts when transmitting through the walls of the plastic flow pipe.
+
+Clock Instability: The custom PCB was initially designed with a crystal oscillator. This component lacked the strict timing precision required by the USS module's high-speed sigma-delta ADC.
+
+Capacitance Mismatch: The 12 pF load capacitors initially placed on the board were incompatible with achieving a stable oscillation for the system clock.
+
+Firmware Timing Prematurity: The firmware's default crystal settling time of 120 μs caused the MCU to attempt capturing ultrasonic data before the clock had fully stabilized, resulting in corrupted telemetry.

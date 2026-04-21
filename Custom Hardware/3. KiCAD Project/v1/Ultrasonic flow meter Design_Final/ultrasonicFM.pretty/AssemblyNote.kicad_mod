@@ -1,0 +1,96 @@
+(footprint "AssemblyNote"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at -0.3302 -1.06934 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "76a3ab62-19d4-435d-b9be-3d74e239c631")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Value" "These assemblies must be clean and free from flux and all contaminants. Use of no clean flux is not acceptable."
+		(at -0.3429 2.32156 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "d2ba49ac-c960-4b28-8287-4213e2bc00b4")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7fb1023f-b834-479f-8ceb-c13f23b89f56")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ccfa8139-6963-4d5e-b198-60f7631047f6")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_rect
+		(start -0.50799 0.508)
+		(end 0.50801 -0.508)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "User.5")
+		(uuid "eea46861-b516-4bd6-93c6-e35786c9eb81")
+	)
+	(fp_text user "${REFERENCE}"
+		(at -4.191 0.63246 0)
+		(unlocked yes)
+		(layer "User.5")
+		(uuid "4c2e76a1-b102-4aaf-8d9b-a331c3bfb7ab")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "${VALUE}"
+		(at 1.143 0.63246 0)
+		(unlocked yes)
+		(layer "User.5")
+		(uuid "d8de15b3-9319-4647-8e5e-d7c54e1de10c")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(embedded_fonts no)
+)

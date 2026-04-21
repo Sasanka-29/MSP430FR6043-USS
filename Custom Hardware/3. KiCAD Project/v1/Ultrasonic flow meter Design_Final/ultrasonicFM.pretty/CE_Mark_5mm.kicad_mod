@@ -1,0 +1,111 @@
+(footprint "CE_Mark_5mm"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at -3.3274 -3.07594 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "271cfcaf-cee1-4c30-8011-4427afbd59e7")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Value" "CE Mark"
+		(at -2.3241 5.31876 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "a519050e-c21a-4edb-b978-28039ede45f3")
+		(effects
+			(font
+				(size 1.016 1.016)
+				(thickness 0.1778)
+			)
+			(justify left bottom)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "5dd5632f-bbaf-4f75-b1aa-f1cb28348118")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "2ffcdc34-1d37-42e5-81a3-e56fd15e444b")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_poly
+		(pts
+			(arc
+				(start 3.49999 1.732051)
+				(mid 2.253585 1.438638)
+				(end 1.540641 0.375)
+			)
+			(xy 1.54065 0.375) (xy 2.99999 0.375) (xy 2.99999 -0.375) (xy 1.54065 -0.375)
+			(arc
+				(start 1.540641 -0.375)
+				(mid 2.253586 -1.438637)
+				(end 3.49999 -1.732051)
+			)
+			(xy 3.49999 -1.73205)
+			(arc
+				(start 3.49999 -2.487469)
+				(mid 0.74999 0)
+				(end 3.49999 2.487469)
+			)
+			(xy 3.49999 2.48746) (xy 3.49999 1.73205)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "aecea255-8aef-45cb-abba-26941015a689")
+	)
+	(fp_poly
+		(pts
+			(arc
+				(start -0.75001 2.487469)
+				(mid -3.50001 0)
+				(end -0.75001 -2.487469)
+			)
+			(xy -0.75001 -2.48747)
+			(arc
+				(start -0.75001 -1.732051)
+				(mid -2.75001 0)
+				(end -0.75001 1.732051)
+			)
+			(xy -0.75001 1.73205) (xy -0.75001 2.48746)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(fill yes)
+		(layer "F.SilkS")
+		(uuid "153b8e7b-c561-4926-af52-b8759367bceb")
+	)
+	(embedded_fonts no)
+)
