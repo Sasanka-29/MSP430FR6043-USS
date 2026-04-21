@@ -1,0 +1,114 @@
+# FIXED
+
+main.obj: ../main.c
+main.obj: ../main.h
+main.obj: C:/ti/msp/USS_02_30_00_03/USS/include/ussSwLib.h
+main.obj: C:/ti/ccs2041/ccs/ccs_base/msp430/include/msp430.h
+main.obj: C:/ti/ccs2041/ccs/ccs_base/msp430/include/msp430fr6043.h
+main.obj: C:/ti/ccs2041/ccs/ccs_base/msp430/include/in430.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/intrinsics.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/intrinsics_legacy_undefs.h
+main.obj: C:/ti/ccs2041/ccs/ccs_base/msp430/include/legacy.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdint.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/_ti_config.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/linkage.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/_stdint40.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/stdint.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/cdefs.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_types.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_types.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_stdint.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdbool.h
+main.obj: C:/ti/msp/USS_02_30_00_03/USS/include/QmathLib.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/limits.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdlib.h
+main.obj: C:/ti/msp/USS_02_30_00_03/USS/include/IQmathLib.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdlib.h
+main.obj: ../USS_Config/USS_userConfig.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL/USS_Lib_HAL.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibCalibration.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/math.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/_defs.h
+main.obj: C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_limits.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonInterrupts.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/USSGenericRegDef.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonSDHS.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonUSS.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonHSPLL.h
+main.obj: C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonTimer.h
+
+../main.c:
+
+../main.h:
+
+C:/ti/msp/USS_02_30_00_03/USS/include/ussSwLib.h:
+
+C:/ti/ccs2041/ccs/ccs_base/msp430/include/msp430.h:
+
+C:/ti/ccs2041/ccs/ccs_base/msp430/include/msp430fr6043.h:
+
+C:/ti/ccs2041/ccs/ccs_base/msp430/include/in430.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/intrinsics.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/intrinsics_legacy_undefs.h:
+
+C:/ti/ccs2041/ccs/ccs_base/msp430/include/legacy.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdint.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/_ti_config.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/linkage.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/_stdint40.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/stdint.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/cdefs.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_types.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_types.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_stdint.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/sys/_stdint.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdbool.h:
+
+C:/ti/msp/USS_02_30_00_03/USS/include/QmathLib.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/limits.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdlib.h:
+
+C:/ti/msp/USS_02_30_00_03/USS/include/IQmathLib.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/stdlib.h:
+
+../USS_Config/USS_userConfig.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL/USS_Lib_HAL.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibCalibration.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/math.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/_defs.h:
+
+C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include/machine/_limits.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonInterrupts.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/USSGenericRegDef.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonSDHS.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonUSS.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonHSPLL.h:
+
+C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonTimer.h:
+

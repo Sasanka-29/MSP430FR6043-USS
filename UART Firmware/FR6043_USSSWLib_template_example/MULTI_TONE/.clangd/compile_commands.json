@@ -1,0 +1,107 @@
+[
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/main.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/system_pre_init.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/benchmarkussswLib.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonHSPLL.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonInterrupts.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonSAPH.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonSDHS.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonTimer.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/common/ussSwLibCommonUSS.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibAlgorithm.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibAppDebug.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibCalibration.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibConfiguration.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibISR.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibMeasurement.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibTemperature.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibVFRCalib.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibVFRCalibFlow.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source/ussSwLibVFRCalibFlowTemperature.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/USS_Config/USS_userConfig.c"
+   },
+   {
+      "directory" : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/MULTI_TONE",
+      "command"   : "clang++ -I\"C:/ti/ccs2041/ccs/ccs_base/msp430/include\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL\" -I\"C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/source\" -I\"C:/ti/msp/USS_02_30_00_03/USS/include\" -I\"C:/ti/ccs2041/ccs/tools/compiler/ti-cgt-msp430_21.6.1.LTS/include\" -D__MSP430FR6043__ -D_MPU_ENABLE -D__EVM430_ID__=0x43 -D__EVM430_VER__=0x20 -D__AFE_EXT_3v3__ -DUSS_PULSE_MODE=2 -xc",
+      "file"      : "C:/Users/sasan/workspace_ccstheia/FR6043_USSSWLib_template_example/ussSWLib/USS_HAL/USS_Lib_HAL.c"
+   }
+]
