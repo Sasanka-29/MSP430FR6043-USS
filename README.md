@@ -248,9 +248,9 @@ MSP430FR6043-USS/
 - [x] UART data output implementation
 - [x] Python CLI parser (`uart_parse.py`)
 - [x] Real-time serial monitor GUI (`uart_gui.py`)
-- [ ] Custom PCB schematic design
-- [ ] Custom PCB layout and fabrication
-- [ ] Hardware optimization and power profiling
+- [x] Custom PCB schematic design
+- [x] Custom PCB layout and fabrication
+- [x] Hardware optimization and power profiling
 - [ ] Enclosure design for handheld spirometer
 - [ ] Patient-facing display/indicator integration
 - [ ] Wireless data transmission (BLE/Wi-Fi)
